@@ -520,6 +520,11 @@ type
   );
   TVTOperationKinds = set of TVTOperationKind;
 
+  {$if CompilerVersion = 23}
+  // Pre-XE3 versions have no TStyleElements type so declare it as a stub
+  TStyleElements = set of (seFont, seClient, seBorder);
+  {$ifend}
+
 const
   DefaultPaintOptions = [toShowButtons, toShowDropmark, toShowTreeLines, toShowRoot, toThemeAware, toUseBlendedImages];
   DefaultAnimationOptions = [];
@@ -529,6 +534,9 @@ const
     toEditOnClick];
   DefaultColumnOptions = [coAllowClick, coDraggable, coEnabled, coParentColor, coParentBidiMode, coResizable,
     coShowDropmark, coVisible, coAllowFocus, coEditable];
+  {$if CompilerVersion = 23}
+  DefaultStyleElements = [seFont, seClient, seBorder];
+  {$ifend}
 
 type
   TBaseVirtualTree = class;
@@ -1592,11 +1600,6 @@ type
     property UnfocusedSelectionColor: TColor index 6 read GetColor write SetColor default clBtnFace;
     property UnfocusedSelectionBorderColor: TColor index 10 read GetColor write SetColor default clBtnFace;
   end;
-
-  {$if CompilerVersion = 23}
-  // Pre-XE3 versions have no TStyleElements type so declare it as a stub
-  TStyleElements = set of (seFont, seClient, seBorder);
-  {$ifend}
 
   // For painting a node and its columns/cells a lot of information must be passed frequently around.
   TVTImageInfo = record
@@ -3118,7 +3121,7 @@ type
     property UpdateCount: Cardinal read FUpdateCount;
     property DoubleBuffered: Boolean read GetDoubleBuffered write SetDoubleBuffered default True;
     {$if CompilerVersion = 23}
-    property StyleElements: TStyleElements read FStyleElements write FStyleElements;
+    property StyleElements: TStyleElements read FStyleElements write FStyleElements default DefaultStyleElements;
     {$ifend}
   end;
 
@@ -12052,7 +12055,7 @@ begin
   inherited;
   
   {$if CompilerVersion = 23}
-  FStyleElements := [seFont, seClient, seBorder];
+  FStyleElements := DefaultStyleElements;
   {$ifend}
 
   ControlStyle := ControlStyle - [csSetCaption] + [csCaptureMouse, csOpaque, csReplicatable, csDisplayDragImage,
