@@ -49,7 +49,7 @@ unit VirtualTrees;
 
 interface
 
-{$if CompilerVersion < 24}{$MESSAGE FATAL 'This version supports only RAD Studio XE3 and higher. Please use V5 from  http://www.jam-software.com/virtual-treeview/VirtualTreeViewV5.5.3.zip  or  https://github.com/Virtual-TreeView/Virtual-TreeView/archive/V5_stable.zip'}{$ifend}
+{$if CompilerVersion < 23}{$MESSAGE FATAL 'This version supports only RAD Studio XE2 and higher. Please use V5 from  http://www.jam-software.com/virtual-treeview/VirtualTreeViewV5.5.3.zip  or  https://github.com/Virtual-TreeView/Virtual-TreeView/archive/V5_stable.zip'}{$ifend}
 
 {$booleval off} // Use fastest possible boolean evaluation
 
@@ -58,7 +58,9 @@ interface
 {$WARN UNSAFE_CAST OFF}
 {$WARN UNSAFE_CODE OFF}
 
+{$if CompilerVersion >= 24}
 {$LEGACYIFEND ON}
+{$ifend}
 {$WARN UNSUPPORTED_CONSTRUCT      OFF}
 
 {$HPPEMIT '#include <objidl.h>'}
@@ -518,6 +520,11 @@ type
   );
   TVTOperationKinds = set of TVTOperationKind;
 
+  {$if CompilerVersion = 23}
+  // Pre-XE3 versions have no TStyleElements type so declare it as a stub
+  TStyleElements = set of (seFont, seClient, seBorder);
+  {$ifend}
+
 const
   DefaultPaintOptions = [toShowButtons, toShowDropmark, toShowTreeLines, toShowRoot, toThemeAware, toUseBlendedImages];
   DefaultAnimationOptions = [];
@@ -527,6 +534,9 @@ const
     toEditOnClick];
   DefaultColumnOptions = [coAllowClick, coDraggable, coEnabled, coParentColor, coParentBidiMode, coResizable,
     coShowDropmark, coVisible, coAllowFocus, coEditable];
+  {$if CompilerVersion = 23}
+  DefaultStyleElements = [seFont, seClient, seBorder];
+  {$ifend}
 
 type
   TBaseVirtualTree = class;
@@ -2232,6 +2242,9 @@ type
     FOnEndOperation: TVTOperationEvent;          // Called when an operation ends
 
     FVclStyleEnabled: Boolean;
+    {$if CompilerVersion = 23}
+    FStyleElements: TStyleElements;
+    {$ifend}
 
     procedure CMStyleChanged(var Message: TMessage); message CM_STYLECHANGED;
     procedure CMParentDoubleBufferedChange(var Message: TMessage); message CM_PARENTDOUBLEBUFFEREDCHANGED;
@@ -2656,7 +2669,7 @@ type
     procedure UpdateDesigner; virtual;
     procedure UpdateEditBounds; virtual;
     procedure UpdateHeaderRect; virtual;
-    procedure UpdateStyleElements; override;
+    procedure UpdateStyleElements; {$if CompilerVersion >= 24} override; {$ifend}
     procedure UpdateWindowAndDragImage(const Tree: TBaseVirtualTree; TreeRect: TRect; UpdateNCArea,
       ReshowDragImage: Boolean); virtual;
     procedure ValidateCache; virtual;
@@ -3107,6 +3120,9 @@ type
     property VisiblePath[Node: PVirtualNode]: Boolean read GetVisiblePath write SetVisiblePath;
     property UpdateCount: Cardinal read FUpdateCount;
     property DoubleBuffered: Boolean read GetDoubleBuffered write SetDoubleBuffered default True;
+    {$if CompilerVersion = 23}
+    property StyleElements: TStyleElements read FStyleElements write FStyleElements default DefaultStyleElements;
+    {$ifend}
   end;
 
 
@@ -12038,6 +12054,10 @@ begin
 
   inherited;
 
+  {$if CompilerVersion = 23}
+  FStyleElements := DefaultStyleElements;
+  {$ifend}
+
   ControlStyle := ControlStyle - [csSetCaption] + [csCaptureMouse, csOpaque, csReplicatable, csDisplayDragImage,
     csReflector];
   FTotalInternalDataSize := 0;
@@ -20627,7 +20647,7 @@ begin
         begin
           if (suoRepaintHeader in Options) and (hoVisible in FHeader.FOptions) then
             FHeader.Invalidate(nil);
-          if not (tsSizing in FStates) and (FScrollBarOptions.ScrollBars in [System.UITypes.TScrollStyle.ssHorizontal, System.UITypes.TScrollStyle.ssBoth]) then
+          if not (tsSizing in FStates) and (FScrollBarOptions.ScrollBars in [{$IF CompilerVersion >= 24}System.UITypes.TScrollStyle.{$ifend}ssHorizontal, {$IF CompilerVersion >= 24}System.UITypes.TScrollStyle.{$ifend}ssBoth]) then
             UpdateHorizontalScrollBar(suoRepaintScrollBars in Options);
         end;
 
@@ -20635,7 +20655,7 @@ begin
         begin
           UpdateVerticalScrollBar(suoRepaintScrollBars in Options);
           if not (FHeader.UseColumns or IsMouseSelecting) and
-            (FScrollBarOptions.ScrollBars in [System.UITypes.TScrollStyle.ssHorizontal, System.UITypes.TScrollStyle.ssBoth]) then
+            (FScrollBarOptions.ScrollBars in [{$IF CompilerVersion >= 24}System.UITypes.TScrollStyle.{$ifend}ssHorizontal, {$IF CompilerVersion >= 24}System.UITypes.TScrollStyle.{$ifend}ssBoth]) then
             UpdateHorizontalScrollBar(suoRepaintScrollBars in Options);
         end;
       end;
@@ -31434,7 +31454,7 @@ begin
     else
       if (R.Bottom > ClientHeight) or Center then
       begin
-        HScrollBarVisible := (ScrollBarOptions.ScrollBars in [System.UITypes.TScrollStyle.ssBoth, System.UITypes.TScrollStyle.ssHorizontal]) and
+        HScrollBarVisible := (ScrollBarOptions.ScrollBars in [{$IF CompilerVersion >= 24}System.UITypes.TScrollStyle.{$ifend}ssBoth, {$IF CompilerVersion >= 24}System.UITypes.TScrollStyle.{$ifend}ssHorizontal]) and
           (ScrollBarOptions.AlwaysVisible or (Integer(FRangeX) > ClientWidth));
         if Center then
           SetOffsetY(FOffsetY - R.Bottom + ClientHeight div 2)
@@ -32291,7 +32311,7 @@ begin
   else
     FEffectiveOffsetX := -FOffsetX;
 
-  if FScrollBarOptions.ScrollBars in [System.UITypes.TScrollStyle.ssHorizontal, System.UITypes.TScrollStyle.ssBoth] then
+  if FScrollBarOptions.ScrollBars in [{$IF CompilerVersion >= 24}System.UITypes.TScrollStyle.{$ifend}ssHorizontal, {$IF CompilerVersion >= 24}System.UITypes.TScrollStyle.{$ifend}ssBoth] then
   begin
     ZeroMemory (@ScrollInfo, SizeOf(ScrollInfo));
     ScrollInfo.cbSize := SizeOf(ScrollInfo);
@@ -33727,11 +33747,11 @@ begin
     DoGetText(lEventArgs);
 
     // Paint the normal text first...
-    if not lEventArgs.CellText.IsEmpty then
+    if {$if CompilerVersion = 23} lEventArgs.CellText <> '' {$else} not lEventArgs.CellText.IsEmpty {$ifend} then
       PaintNormalText(PaintInfo, TextOutFlags, lEventArgs.CellText);
 
     // ... and afterwards the static text if not centered and the node is not multiline enabled.
-    if (Alignment <> taCenter) and not (vsMultiline in PaintInfo.Node.States) and (toShowStaticText in TreeOptions.FStringOptions) and not lEventArgs.StaticText.IsEmpty then
+    if (Alignment <> taCenter) and not (vsMultiline in PaintInfo.Node.States) and (toShowStaticText in TreeOptions.FStringOptions) and {$if CompilerVersion = 23} (lEventArgs.StaticText <> '') {$else} not lEventArgs.StaticText.IsEmpty {$ifend} then
       PaintStaticText(PaintInfo, TextOutFlags, lEventArgs.StaticText);
   finally
     RestoreFontChangeEvent(PaintInfo.Canvas);
