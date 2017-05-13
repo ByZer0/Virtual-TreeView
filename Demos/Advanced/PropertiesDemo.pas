@@ -4,6 +4,7 @@ unit PropertiesDemo;
 //   - Property page like string tree with individual node editors.
 //   - Incremental search.
 // Written by Mike Lischke.
+{$WARN UNSAFE_CODE OFF} // Prevent warnins that are not applicable 
 
 interface
 
@@ -41,6 +42,7 @@ type
       var Result: Integer);
     procedure RadioGroup1Click(Sender: TObject);
     procedure VST3StateChange(Sender: TBaseVirtualTree; Enter, Leave: TVirtualTreeStates);
+    procedure VST3FreeNode(Sender: TBaseVirtualTree; Node: PVirtualNode);
   private
     procedure WMStartEditing(var Message: TMessage); message WM_STARTEDITING;
   end;
@@ -338,5 +340,15 @@ begin
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
+
+procedure TPropertiesForm.VST3FreeNode(Sender: TBaseVirtualTree;
+  Node: PVirtualNode);
+var
+  Data: PPropertyData;
+
+begin
+  Data := Sender.GetNodeData(Node);
+  Finalize(Data^);
+end;
 
 end.
