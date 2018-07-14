@@ -48,10 +48,8 @@ object GeneralForm: TGeneralForm
     Header.AutoSizeIndex = -1
     Header.Background = clBtnShadow
     Header.Options = [hoColumnResize, hoDblClickResize, hoDrag, hoHotTrack, hoShowHint, hoVisible]
-    Header.ParentFont = True
     Header.PopupMenu = VTHPopup
     Header.Style = hsFlatButtons
-    HintAnimation = hatFade
     HintMode = hmTooltip
     HotCursor = crHandPoint
     Images = TreeImages
@@ -70,6 +68,7 @@ object GeneralForm: TGeneralForm
     OnDragOver = VST2DragOver
     OnFocusChanging = VST2FocusChanging
     OnFreeNode = VST2FreeNode
+    OnGetText = VST2GetText
     OnPaintText = VST2PaintText
     OnGetImageIndexEx = VST2GetImageIndexEx
     OnGetNodeDataSize = VST2GetNodeDataSize
@@ -77,6 +76,7 @@ object GeneralForm: TGeneralForm
     OnInitChildren = VST2InitChildren
     OnInitNode = VST2InitNode
     OnKeyDown = VST2KeyDown
+    OnNewText = VST2NewText
     OnStateChange = VST2StateChange
     Columns = <
       item
@@ -284,7 +284,7 @@ object GeneralForm: TGeneralForm
     Left = 22
     Top = 148
     Bitmap = {
-      494C0101120013000C0010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010112001300100010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000005000000001002000000000000050
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
@@ -993,7 +993,7 @@ object GeneralForm: TGeneralForm
     Left = 32
     Top = 200
     Bitmap = {
-      494C0101510054000C0018001800FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010151005400100018001800FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       000000000000360000002800000060000000F8010000010020000000000000F4
       0200000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
